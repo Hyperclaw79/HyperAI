@@ -71,7 +71,10 @@ class HyperAI(discord.Client):
                         
         ASCII Shrugimation.
         """
-        await message.delete()
+        try:
+            await message.delete()    
+        except:
+            print('Jeez! I need better permissions in {}.'.format(message.guild))
         shrugList = ["`¯\__(ツ)/¯`", "`¯\_(ツ)_/¯`", "`¯\(ツ)__/¯`", "`¯\_(ツ)_/¯`"]
         lulz = await message.channel.send(shrugList[1])
         i = 2
@@ -88,7 +91,10 @@ class HyperAI(discord.Client):
         """
         message_content = message.content.strip()
         chan = message.channel
-        await message.delete()
+        try:
+            await message.delete()    
+        except:
+            print('Jeez! I need better permissions in {}.'.format(message.guild))
         mesg = message_content.replace('{}wow'.format(self.prefix), '')
 
         t = ""
@@ -158,7 +164,10 @@ class HyperAI(discord.Client):
         Add a list of reactions to the previous message. Separate the emojis with spaces.
         """
         target = await message.channel.history(limit=1, before=message).next()
-        await message.delete()
+        try:
+            await message.delete()    
+        except:
+            print('Jeez! I need better permissions in {}.'.format(message.guild))
         reactions = message.content.replace('{}react ','').split(' ')
         for reaction in reactions:
             try:
