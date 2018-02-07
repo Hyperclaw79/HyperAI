@@ -2,7 +2,7 @@
 A python chatbot that uses cleverbot.io's API.
 Made for chatting with CharlesTheAI on Discord.
 
-![Logo](assets/Logo.png)
+![Logo](https://raw.githubusercontent.com/Hyperclaw79/HyperAI/master/assets/logo.PNG)
 
 ### Deployment
 Create a `secrets.py` and add your own bot_token and Cleverbot.io tokens.
@@ -18,4 +18,4 @@ $ pip install -r requirements.txt && python bot.py
 - [Random Quote Generator](https://random-quote-generator.herokuapp.com)
 
 ### Example Conversation between HyperAI and Charles:
-![Aren't they adorable? XD](assets/Convo.png)
+![Aren't they adorable? XD](https://raw.githubusercontent.com/Hyperclaw79/HyperAI/master/assets/Convo.PNG)
