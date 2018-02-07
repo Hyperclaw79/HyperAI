@@ -15,6 +15,7 @@ $ pip install -r requirements.txt && python bot.py
 - [Cleverbot.IO](https://cleverbot.io/)
 - [Discord.py Rewrite](https://github.com/Rapptz/discord.py/tree/rewrite)
 - [Aiohttp](https://github.com/aio-libs/aiohttp)
+- [Random Quote Generator](https://random-quote-generator.herokuapp.com)
 
 ### Example Conversation between HyperAI and Charles:
 ![Aren't they adorable? XD](assets/Convo.png)

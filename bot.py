@@ -293,12 +293,12 @@ class HyperAI(discord.Client):
                             quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
                             await message.channel.send("{} {}".format(message.author.mention,quote))
                             with open('logs.txt','a') as f:
-                                f.write("{} -> {}\n".format(message.guild.me.name, quote))
+                                f.write("{} -> {}\n".format(message.guild.me.name, quote.replace('\n',' ')))
                         else:    
                             await asyncio.sleep(self.delay)
                             with open('logs.txt','a') as f:
                                 reply = re.sub(r"<@\d+>", "" ,message.content.strip())
-                                f.write("{} -> {}\n".format(message.author.name, reply))
+                                f.write("{} -> {}\n".format(message.author.name, reply.replace('\n',' ')))
                                 response = await self.brain.query(message.content)
                                 response = response.strip()
                                 reply = re.sub(r"<@\d+>", "" , response)
@@ -307,7 +307,7 @@ class HyperAI(discord.Client):
                                     response = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
                                     reply = re.sub(r"<@\d+>", "" , response)
                                 await message.channel.send("{} {}".format(message.author.mention,response))
-                                f.write("{} -> {}\n".format(message.guild.me.name, reply))
+                                f.write("{} -> {}\n".format(message.guild.me.name, reply.replace('\n',' ')))
                     else:
                         response = await self.brain.query(message.content)
                         response = response.strip()
