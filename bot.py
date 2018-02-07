@@ -6,7 +6,8 @@ import inspect
 from textwrap import dedent
 from brain import Brain
 from secrets import *
-
+import re
+import requests
 
 class HyperAI(discord.Client):
     def __init__(self):
@@ -17,6 +18,8 @@ class HyperAI(discord.Client):
         self.brain = Brain(cb_username,cb_key)        
         self.delay = 0
         self.triggerable = True
+        self.redundancy_count = 0
+        self.session = requests.Session()
         
 
     async def on_ready(self):
@@ -269,24 +272,52 @@ class HyperAI(discord.Client):
             await delme.delete()
 
     async def on_message(self, message):
+        
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
             return
-        
+
+        # we do not want the bot to reply to itself or other bots
+        if message.author.id == self.user.id:
+            return
+
+        #Chatbot
         if self.user.mentioned_in(message) and not message.mention_everyone:
             if (message.author.bot and self.triggerable) or not message.author.bot:
                 async with message.channel.typing():
                     if message.author.bot:
-                        await asyncio.sleep(self.delay)
-                    response = await self.brain.query(message.content)
-                    await message.channel.send("{} {}".format(message.author.mention,response))
+                        with open('logs.txt','r') as f:
+                            logs = (message.split('-> ')[1] for message in f.read().splitlines())
+                        reply = re.sub(r"<@\d+>", "" ,message.content.strip())
+                        if reply in logs:
+                            self.redundancy_count += 1
+                            quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
+                            await message.channel.send("{} {}".format(message.author.mention,quote))
+                            with open('logs.txt','a') as f:
+                                f.write("{} -> {}\n".format(message.guild.me.name, quote))
+                        else:    
+                            await asyncio.sleep(self.delay)
+                            with open('logs.txt','a') as f:
+                                reply = re.sub(r"<@\d+>", "" ,message.content.strip())
+                                f.write("{} -> {}\n".format(message.author.name, reply))
+                                response = await self.brain.query(message.content)
+                                response = response.strip()
+                                reply = re.sub(r"<@\d+>", "" , response)
+                                while reply in logs:
+                                    self.redundancy_count += 1
+                                    response = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
+                                    reply = re.sub(r"<@\d+>", "" , response)
+                                await message.channel.send("{} {}".format(message.author.mention,response))
+                                f.write("{} -> {}\n".format(message.guild.me.name, reply))
+                    else:
+                        response = await self.brain.query(message.content)
+                        response = response.strip()
+                        await message.channel.send("{} {}".format(message.author.mention,response))
+                        
             elif message.author.bot and not self.triggerable:
                 return
             else:
                 pass
 
-        # we do not want the bot to reply to itself or other bots
-        if message.author.id == self.user.id:
-            return
 
         if message.content == "(╯°□°）╯︵ ┻━┻":
             await message.channel.send("┬─┬ ノ( ゜-゜ノ)")    
