@@ -40,6 +40,8 @@ class Brain:
 
             if r['status'] == 'success':
                 return r['response'], 200
-        except:
+            else:
+                return "Looks like the CleverBot.IO api is down. Please try later.", 500    
+        except Exception as e:
             return "Looks like the CleverBot.IO api is down. Please try later.", 500
 
