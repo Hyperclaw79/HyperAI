@@ -9,14 +9,22 @@ class Brain:
         self.user = user
         self.key = key
         self.nick = nick
-        body = {
-            'user': user,
-            'key': key,
-            'nick': nick
-        }
         self.loop = loop
         self.sess = aiohttp.ClientSession(loop=self.loop)
-        self.sess.post('https://cleverbot.io/1.0/create', json=body)
+
+    async def create(self):
+        body = {
+                    'user': self.user,
+                    'key': self.key,
+                    'nick': self.nick
+                }
+        with aiohttp.Timeout(10):
+            async with self.sess.post('https://cleverbot.io/1.0/create', json=body) as resp:
+                r = await resp.json()
+        if resp.status > 304:
+            return "API is down. Using qoutes mode."
+        else:
+            return "API is online. Using clever mode."
         
     async def query(self, text):
         body = {
