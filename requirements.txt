@@ -1,2 +1,3 @@
+requests
 aiohttp==2.2.5
-git+https://github.com/Rapptz/discord.py/tree/rewrite
+https://github.com/Rapptz/discord.py/archive/rewrite.zip
