@@ -290,7 +290,10 @@ class HyperAI(discord.Client):
                         reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                         if reply in logs:
                             self.redundancy_count += 1
-                            quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
+                            quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                            while "quote" not in quote.keys():
+                                quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                            quote = quote["quote"]
                             await message.channel.send("{} {}".format(message.author.mention,quote))
                             with open('logs.txt','a') as f:
                                 f.write("\n{} -> {}".format(message.guild.me.name, quote.replace('\n',' ')))
@@ -301,20 +304,26 @@ class HyperAI(discord.Client):
                                 f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
                                 response, status = await self.brain.query(message.content)
                                 if status == 500:
-                                    response = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
-                                response = response.strip()
+                                    while "quote" not in quote.keys():
+                                        quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                    quote = quote["quote"]
+                                    response = response.strip()
                                 reply = re.sub(r"<@\d+>", "" , response)
                                 while reply in logs:
                                     self.redundancy_count += 1
-                                    response = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
+                                    while "quote" not in quote.keys():
+                                        quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                    quote = quote["quote"]
                                     reply = re.sub(r"<@\d+>", "" , response)
                                 await message.channel.send("{} {}".format(message.author.mention,response))
                                 f.write("\n{} -> {}".format(message.guild.me.name, reply.replace('\n',' ')))
                     else:
                         response, status = await self.brain.query(message.content)
                         if status == 500:
-                            response = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()["quote"]
-                        response = response.strip()
+                            while "quote" not in quote.keys():
+                                quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                            quote = quote["quote"]
+                            response = response.strip()
                         await message.channel.send("{} {}".format(message.author.mention,response))
                         
             elif message.author.bot and not self.triggerable:
