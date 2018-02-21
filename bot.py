@@ -8,6 +8,7 @@ from brain import Brain
 from secrets import *
 import re
 import requests
+import time
 
 class HyperAI(discord.Client):
     def __init__(self):
@@ -292,8 +293,11 @@ class HyperAI(discord.Client):
                         if reply in logs:
                             self.redundancy_count += 1
                             quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
-                            while "quote" not in quote.keys():
+                            while True:
+                                time.sleep(0.01)
                                 quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                if "quote" in quote.keys():
+                                    break
                             quote = quote["quote"]
                             await message.channel.send("{} {}".format(message.author.mention,quote))
                             with open('logs.txt','a',encoding="utf8") as f:
@@ -305,15 +309,21 @@ class HyperAI(discord.Client):
                                 f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
                                 response, status = await self.brain.query(message.content)
                                 if status == 500:
-                                    while "quote" not in quote.keys():
+                                    while True:
+                                        time.sleep(0.01)
                                         quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                        if "quote" in quote.keys():
+                                            break
                                     quote = quote["quote"]
                                     response = response.strip()
                                 reply = re.sub(r"<@\d+>", "" , response)
                                 while reply in logs:
                                     self.redundancy_count += 1
-                                    while "quote" not in quote.keys():
+                                    while True:
+                                        time.sleep(0.01)
                                         quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                        if "quote" in quote.keys():
+                                            break
                                     quote = quote["quote"]
                                     reply = re.sub(r"<@\d+>", "" , response)
                                 await message.channel.send("{} {}".format(message.author.mention,response))
@@ -321,8 +331,11 @@ class HyperAI(discord.Client):
                     else:
                         response, status = await self.brain.query(message.content)
                         if status == 500:
-                            while "quote" not in quote.keys():
+                            while True:
+                                time.sleep(0.01)
                                 quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                if "quote" in quote.keys():
+                                    break
                             quote = quote["quote"]
                             response = response.strip()
                         await message.channel.send("{} {}".format(message.author.mention,response))
