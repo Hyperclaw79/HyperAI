@@ -26,7 +26,8 @@ class HyperAI(discord.Client):
         print('HyperAI is now live!')
         game = discord.Game(name="that Chatgame with @CharlesTheAI")
         await self.change_presence(game=game)
-
+        created_brain = await self.brain.create()
+        print(created_brain)
 
     async def cmd_set_delay(self,message):
         if message.author.id == 132500768317112320 or "admin" in [role.name.lower() for role in message.author.roles]:
