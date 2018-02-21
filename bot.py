@@ -286,7 +286,7 @@ class HyperAI(discord.Client):
             if (message.author.bot and self.triggerable) or not message.author.bot:
                 async with message.channel.typing():
                     if message.author.bot:
-                        with open('logs.txt','r') as f:
+                        with open('logs.txt','r',encoding="utf8") as f:
                             logs = [message.split('-> ')[1] for message in f.read().splitlines() if '->' in message]
                         reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                         if reply in logs:
@@ -296,11 +296,11 @@ class HyperAI(discord.Client):
                                 quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
                             quote = quote["quote"]
                             await message.channel.send("{} {}".format(message.author.mention,quote))
-                            with open('logs.txt','a') as f:
+                            with open('logs.txt','a',encoding="utf8") as f:
                                 f.write("\n{} -> {}".format(message.guild.me.name, quote.replace('\n',' ')))
                         else:    
                             await asyncio.sleep(self.delay)
-                            with open('logs.txt','a') as f:
+                            with open('logs.txt','a',encoding="utf8") as f:
                                 reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                                 f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
                                 response, status = await self.brain.query(message.content)
