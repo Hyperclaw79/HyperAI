@@ -328,6 +328,7 @@ class HyperAI(discord.Client):
                                 await message.channel.send("{} {}".format(message.author.mention,response))
                                 f.write("\n{} -> {}".format(message.guild.me.name, reply.replace('\n',' ')))
                     else:
+                        response, status = await self.brain.query(message.content)
                         if status and status == 500:
                             while True:
                                 time.sleep(0.01)
