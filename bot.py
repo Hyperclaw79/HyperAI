@@ -84,6 +84,7 @@ class HyperAI(discord.Client):
         lulz = await message.channel.send(shrugList[1])
         i = 2
         while i < 400:
+            print('loop 1')
             await lulz.edit(content=shrugList[i%4])
             i = i + 1    
 
@@ -287,52 +288,65 @@ class HyperAI(discord.Client):
             if (message.author.bot and self.triggerable) or not message.author.bot:
                 async with message.channel.typing():
                     if message.author.bot:
+                        await asyncio.sleep(self.delay)
                         with open('logs.txt','r',encoding="utf8") as f:
                             logs = [message.split('-> ')[1] for message in f.read().splitlines() if '->' in message]
                         reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                         if reply in logs:
                             self.redundancy_count += 1
                             while True:
+                                print('loop 2')
                                 time.sleep(0.01)
                                 quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                print(quote)
                                 if "quote" in quote.keys():
                                     break
                             quote = quote["quote"]
                             await message.channel.send("{} {}".format(message.author.mention,quote))
                             with open('logs.txt','a',encoding="utf8") as f:
                                 f.write("\n{} -> {}".format(message.guild.me.name, quote.replace('\n',' ')))
-                        else:    
-                            await asyncio.sleep(self.delay)
+                        else:
                             with open('logs.txt','a',encoding="utf8") as f:
                                 reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                                 f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
                                 response, status = await self.brain.query(message.content)
                                 if status and status == 500:
                                     while True:
+                                        print('loop 3')
                                         time.sleep(0.01)
                                         quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                        print(quote)
                                         if "quote" in quote.keys():
                                             break
                                     response = quote["quote"]
                                     response = response.strip()
                                 reply = re.sub(r"<@\d+>", "" , response)
+                                i = 0
                                 while reply in logs:
+                                    i += 1
+                                    print('loop 4_0')
                                     self.redundancy_count += 1
                                     while True:
+                                        print('loop 4')
                                         time.sleep(0.01)
                                         quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                        print(quote, quote.keys(), "quote", "quote" in quote.keys())
                                         if "quote" in quote.keys():
                                             break
                                     response = quote["quote"]
                                     reply = re.sub(r"<@\d+>", "" , response)
+                                    if i >= 10:
+                                        break
                                 await message.channel.send("{} {}".format(message.author.mention,response))
                                 f.write("\n{} -> {}".format(message.guild.me.name, reply.replace('\n',' ')))
                     else:
                         response, status = await self.brain.query(message.content)
                         if status and status == 500:
                             while True:
+                                print('loop 5')
                                 time.sleep(0.01)
                                 quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                                print(quote)
                                 if "quote" in quote.keys():
                                     break
                             response = quote["quote"]
