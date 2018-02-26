@@ -9,6 +9,8 @@ from secrets import *
 import re
 import requests
 import time
+import html
+import random
 
 class HyperAI(discord.Client):
     def __init__(self):
@@ -273,6 +275,87 @@ class HyperAI(discord.Client):
             await msg1.delete()
             await delme.delete()
 
+    async def chatbot(self, message):
+        def get_message():
+            def heroku():
+                while True:
+                    time.sleep(0.01)
+                    quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
+                    if "quote" in quote.keys():
+                        break
+                response = quote["quote"].strip()
+                return response
+            def storm():
+                while True:
+                    time.sleep(0.01)
+                    quote = self.session.get("http://quotes.stormconsultancy.co.uk/random.json").json()
+                    if "quote" in quote.keys():
+                        break
+                response = quote["quote"].strip()
+                return response    
+            def forismatic():    
+                while True:
+                    time.sleep(0.01)
+                    quote = self.session.get("https://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en").json()
+                    if "quoteText" in quote.keys():
+                        break
+                response = quote["quoteText"].strip()
+                return response
+            def qod():
+                while True:
+                    time.sleep(0.01)
+                    quote = self.session.get("https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1").json()
+                    if isinstance(quote, list) and "content" in quote[0]:
+                        break
+                response = quote[0]['content'].split('<p>')[1].split('</p>')[0].strip()
+                return response
+            sources = [heroku,storm,forismatic,qod]
+            while True:
+                time.sleep(0.01)
+                try:
+                    choice = random.choice(sources)
+                    response = html.unescape(choice())
+                    return response
+                except Exception as e:
+                    print(str(e))
+
+        if (message.author.bot and self.triggerable) or not message.author.bot:
+            async with message.channel.typing():
+                if message.author.bot:
+                    await asyncio.sleep(self.delay)
+                    with open('logs.txt','r',encoding="utf8") as f:
+                        logs = [message.split('-> ')[1] for message in f.read().splitlines() if '->' in message]
+                    reply = re.sub(r"<@\d+>", "" ,message.content.strip())
+                    if reply in logs:
+                        self.redundancy_count += 1
+                        quote = get_message()
+                        await message.channel.send("{} {}".format(message.author.mention,quote))
+                        with open('logs.txt','a',encoding="utf8") as f:
+                            f.write("\n{} -> {}".format(message.guild.me.name, quote.replace('\n',' ')))
+                    else:    
+                        with open('logs.txt','a',encoding="utf8") as f:
+                            reply = re.sub(r"<@\d+>", "" ,message.content.strip())
+                            f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
+                            response, status = await self.brain.query(message.content)
+                            if status and status == 500:
+                                response = get_message()
+                            while response in logs:
+                                self.redundancy_count += 1
+                                response = get_message()
+                            await message.channel.send("{} {}".format(message.author.mention,response))
+                            f.write("\n{} -> {}".format(message.guild.me.name, reply.replace('\n',' ')))
+                else:
+                    response, status = await self.brain.query(message.content)
+                    if status and status == 500:
+                        response = get_message()
+                        print(response)
+                    await message.channel.send("{} {}".format(message.author.mention,response))
+                    
+        elif message.author.bot and not self.triggerable:
+            return
+        else:
+            pass        
+
     async def on_message(self, message):
         
         if self.prefix not in message.content and message.content != "(╯°□°）╯︵ ┻━┻" and not self.user.mentioned_in(message):
@@ -284,66 +367,7 @@ class HyperAI(discord.Client):
 
         #Chatbot
         if self.user.mentioned_in(message) and not message.mention_everyone:
-            if (message.author.bot and self.triggerable) or not message.author.bot:
-                async with message.channel.typing():
-                    if message.author.bot:
-                        with open('logs.txt','r',encoding="utf8") as f:
-                            logs = [message.split('-> ')[1] for message in f.read().splitlines() if '->' in message]
-                        reply = re.sub(r"<@\d+>", "" ,message.content.strip())
-                        if reply in logs:
-                            self.redundancy_count += 1
-                            while True:
-                                time.sleep(0.01)
-                                quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
-                                if "quote" in quote.keys():
-                                    break
-                            quote = quote["quote"]
-                            await message.channel.send("{} {}".format(message.author.mention,quote))
-                            with open('logs.txt','a',encoding="utf8") as f:
-                                f.write("\n{} -> {}".format(message.guild.me.name, quote.replace('\n',' ')))
-                        else:    
-                            await asyncio.sleep(self.delay)
-                            with open('logs.txt','a',encoding="utf8") as f:
-                                reply = re.sub(r"<@\d+>", "" ,message.content.strip())
-                                f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
-                                response, status = await self.brain.query(message.content)
-                                if status and status == 500:
-                                    while True:
-                                        time.sleep(0.01)
-                                        quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
-                                        if "quote" in quote.keys():
-                                            break
-                                    response = quote["quote"]
-                                    response = response.strip()
-                                reply = re.sub(r"<@\d+>", "" , response)
-                                while reply in logs:
-                                    self.redundancy_count += 1
-                                    while True:
-                                        time.sleep(0.01)
-                                        quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
-                                        if "quote" in quote.keys():
-                                            break
-                                    response = quote["quote"]
-                                    reply = re.sub(r"<@\d+>", "" , response)
-                                await message.channel.send("{} {}".format(message.author.mention,response))
-                                f.write("\n{} -> {}".format(message.guild.me.name, reply.replace('\n',' ')))
-                    else:
-                        response, status = await self.brain.query(message.content)
-                        if status and status == 500:
-                            while True:
-                                time.sleep(0.01)
-                                quote = self.session.get("https://random-quote-generator.herokuapp.com/api/quotes/random").json()
-                                if "quote" in quote.keys():
-                                    break
-                            response = quote["quote"]
-                            response = response.strip()
-                        await message.channel.send("{} {}".format(message.author.mention,response))
-                        
-            elif message.author.bot and not self.triggerable:
-                return
-            else:
-                pass
-
+            await self.chatbot(message)
 
         if message.content == "(╯°□°）╯︵ ┻━┻":
             await message.channel.send("┬─┬ ノ( ゜-゜ノ)")    
