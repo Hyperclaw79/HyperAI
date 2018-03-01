@@ -16,6 +16,7 @@ class HyperAI(discord.Client):
     def __init__(self):
         self.prefix = '*'
         super().__init__()
+        self.loop = asyncio.get_event_loop()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' HyperAI/1.0'
         self.brain = Brain(cb_username, cb_key, cb_nick, loop=self.loop)        
