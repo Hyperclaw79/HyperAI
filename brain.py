@@ -20,9 +20,8 @@ class Brain:
         print("Initiated Brain ClientSession.")
 
     async def create(self):
-        with aiohttp.Timeout(10):
-            async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
-                r = await resp.json()
+        async with self.sess.post('https://cleverbot.io/1.0/create', json=self.body) as resp:
+            r = await resp.json()
         if resp.status == 200:
             if r["status"] is not "success":
                 self.nick += '-{}'.format(random.randint(1,1000))
@@ -36,9 +35,8 @@ class Brain:
     async def query(self, text):
         self.body['text'] = text
         try:
-            with aiohttp.Timeout(10):
-                async with self.sess.post('https://cleverbot.io/1.0/ask', json=self.body) as resp:
-                    r = await resp.json()
+            async with self.sess.post('https://cleverbot.io/1.0/ask', json=self.body) as resp:
+                r = await resp.json()
 
             if r['status'] == 'success':
                 return r['response'], 200
