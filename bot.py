@@ -17,21 +17,23 @@ class HyperAI(discord.Client):
         self.prefix = '*'
         super().__init__()
         self.loop = asyncio.get_event_loop()
-        self.aiosession = aiohttp.ClientSession(loop=self.loop)
-        self.http.user_agent += ' HyperAI/1.0'
+        self.http.user_agent += ' HyperAI/2.0'
         self.brain = Brain(cb_username, cb_key, cb_nick, loop=self.loop)        
         self.delay = 0
         self.triggerable = True
         self.redundancy_count = 0
         self.session = requests.Session()
+        self.session.headers.update({"User-Agent": self.http.user_agent})
+        self.api_status = 500
         
 
     async def on_ready(self):
+        created_brain = await self.brain.create()
+        print(created_brain[0])
+        self.api_status = created_brain[1]
         print('HyperAI is now live!')
         game = discord.Game(name="that Chatgame with @CharlesTheAI")
-        await self.change_presence(game=game)
-        created_brain = await self.brain.create()
-        print(created_brain)
+        await self.change_presence(activity=game, status=discord.Status.online)
 
     async def cmd_set_delay(self,message):
         if message.author.id == 132500768317112320 or "admin" in [role.name.lower() for role in message.author.roles]:
@@ -308,14 +310,14 @@ class HyperAI(discord.Client):
                     quote = self.session.get("https://quotesondesign.com/wp-json/posts?filter[orderby]=rand&filter[posts_per_page]=1").json()
                     if isinstance(quote, list) and "content" in quote[0]:
                         break
-                response = quote[0]['content'].split('<p>')[1].split('</p>')[0].strip()
+                response = quote[0]['content'].split('<p>')[1].split('</p>')[0].strip().replace('<br />','')
                 return response
             sources = [heroku,storm,forismatic,qod]
             while True:
                 time.sleep(0.01)
                 try:
                     choice = random.choice(sources)
-                    response = html.unescape(choice())
+                    response = choice()
                     return response
                 except Exception as e:
                     print(str(e))
@@ -337,8 +339,11 @@ class HyperAI(discord.Client):
                         with open('logs.txt','a',encoding="utf8") as f:
                             reply = re.sub(r"<@\d+>", "" ,message.content.strip())
                             f.write("\n{} -> {}".format(message.author.name, reply.replace('\n',' ')))
-                            response, status = await self.brain.query(message.content)
-                            if status and status == 500:
+                            if self.api_status == 200:
+                                response, status = await self.brain.query(message.content)
+                                if status and status == 500:
+                                    response = get_message()
+                            else:
                                 response = get_message()
                             while response in logs:
                                 self.redundancy_count += 1
